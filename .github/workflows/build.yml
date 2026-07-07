@@ -1,0 +1,37 @@
+name: Build ProtoHaxNeo APK
+# 触发条件：提交代码自动编译，也支持手动触发
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build_apk:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. 拉取仓库全部代码
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      # 2. 配置 JDK 17（项目Gradle 7.3.1 配套版本）
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      # 3. 赋予gradlew脚本执行权限（Linux环境必须）
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # 4. 编译Debug安装包
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug
+
+      # 5. 上传编译生成的APK文件，编译完成后可下载
+      - name: Upload generated APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ProtoHaxNeo-APK
+          path: app/build/outputs/apk/debug/*.apk
